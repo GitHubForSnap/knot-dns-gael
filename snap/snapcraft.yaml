@@ -1,0 +1,85 @@
+name: knot-dns-gael
+version: "v3.4.0"
+base: core22
+summary: Knot DNS
+description: |
+  Knot DNS is a high-performance authoritative-only DNS server
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: armhf
+  - build-on: arm64
+  - build-on: amd64
+
+license: "GPL-3.0"
+
+package-repositories:
+  - type: apt
+    ppa: cz.nic-labs/knot-dns-latest
+
+apps:
+  knotd-service:
+    command: launcher/knotd-service.sh
+    daemon: forking
+    install-mode: disable
+    plugs:
+      - network
+      - network-bind
+
+  knotd:
+    command: usr/sbin/knotd
+    plugs:
+      - network
+      - network-bind
+
+  knotc:
+    command: usr/sbin/knotc
+    plugs:
+      - network
+
+  kcatalogprint:
+    command: usr/sbin/kcatalogprint
+
+  keymgr:
+    command: usr/sbin/keymgr
+
+  kjournalprint:
+    command: usr/sbin/kjournalprint
+
+  kdig:
+    command: usr/bin/kdig
+    plugs:
+      - network
+
+  knsupdate:
+    command: usr/bin/knsupdate
+    plugs:
+      - network
+
+  kxdpgun:
+    command: usr/sbin/kxdpgun
+    plugs:
+      - network
+
+parts:
+  launcher:
+    plugin: dump
+    source: snap/local/launcher
+    organize:
+      'knotd-service.sh' : launcher/
+    stage:
+      - launcher/knotd-service.sh
+
+  knot:
+    plugin: nil
+    stage-packages:
+      - knot
+      - knot-dnsutils
+    prime:
+      - -etc
+      - -lib
+      - -usr/share
+      - -var
+
